@@ -72,8 +72,7 @@ class ConnectionHandler extends Thread {
                     String contentType = Files.probeContentType(requestedFile.toPath());
                     responseMessage.setContentType(contentType);
                     InputStream inputStream = new FileInputStream(requestedFile);
-                    byte[] data = new byte[inputStream.available()];
-                    inputStream.read(data);
+                    byte[] data = inputStream.readAllBytes();
                     inputStream.close();
                     //如果是text类型的
                     if (contentType.split("/")[0].equals("text")){
@@ -85,6 +84,7 @@ class ConnectionHandler extends Thread {
                     }
                 }
                 catch (IOException e){
+                    e.printStackTrace();
                     responseMessage = new ResponseMessage("1.1", "500", "Internal Server Error");
                 }
             }
@@ -95,7 +95,14 @@ class ConnectionHandler extends Thread {
     }
 
     private String processUrl(String originUrl){
+        if (originUrl.equals("")){
+            return "resources" + getDefaultUrl();
+        }
         return "resources" + originUrl;
+    }
+
+    private String getDefaultUrl(){
+        return "/hello.txt";
     }
 
     /**
