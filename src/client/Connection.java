@@ -1,5 +1,7 @@
 package client;
 
+import server.exception.ResolveException;
+
 import java.net.Socket;
 
 /**
@@ -45,7 +47,12 @@ class Connection {
             }
         }
         sender.send(requestMessage.getRequest());
-        responseMessage.setByResponse(receiver.receive());
+        try {
+            responseMessage = ResponseMessage.parse(receiver.receive());
+        }catch (ResolveException e){
+            e.printStackTrace();
+            System.err.println("客户端解析错误！");
+        }
         if (isPersistent()) {
             if (!State.persistentConnections.contains(this)) {
                 State.persistentConnections.add(this);

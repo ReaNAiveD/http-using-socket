@@ -2,7 +2,6 @@ package server;
 
 import server.exception.ResolveException;
 
-import java.io.File;
 import java.util.HashMap;
 
 /**

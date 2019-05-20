@@ -1,12 +1,14 @@
 package server;
 
+import server.RequestMessage;
+import server.ResponseMessage;
 import server.exception.ResolveException;
-import sun.misc.BASE64Encoder;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Base64;
 
 /**
  * 连接线程类
@@ -78,8 +80,8 @@ class ConnectionHandler extends Thread {
                         responseMessage.setEntityBody(new String(data, StandardCharsets.UTF_8));
                     }
                     else {
-                        BASE64Encoder encoder = new BASE64Encoder();
-                        responseMessage.setEntityBody(encoder.encode(data));
+                        Base64.Encoder encoder = Base64.getEncoder();
+                        responseMessage.setEntityBody(encoder.encodeToString(data));
                     }
                 }
                 catch (IOException e){
