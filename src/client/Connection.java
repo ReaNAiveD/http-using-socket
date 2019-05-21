@@ -147,7 +147,9 @@ class Connection {
     private String processUrl(String originUrl) throws ResourceStoreException{
         File dire = new File("clientResources");
         if (!dire.exists()) {
-            if (!dire.mkdir()) throw new ResourceStoreException();
+            if (!dire.mkdir()) {
+                throw new ResourceStoreException();
+            }
         }
         else if (dire.exists() && dire.isDirectory()){
             return "clientResources" + originUrl;

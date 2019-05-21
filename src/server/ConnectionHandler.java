@@ -3,6 +3,7 @@ package server;
 import server.RequestMessage;
 import server.ResponseMessage;
 import server.exception.ResolveException;
+import server.utils.InputStreamTool;
 
 import java.io.*;
 import java.net.Socket;
@@ -72,7 +73,7 @@ class ConnectionHandler extends Thread {
                     String contentType = Files.probeContentType(requestedFile.toPath());
                     responseMessage.setContentType(contentType);
                     InputStream inputStream = new FileInputStream(requestedFile);
-                    byte[] data = inputStream.readAllBytes();
+                    byte[] data = InputStreamTool.readAllBytes(inputStream);
                     inputStream.close();
                     //如果是text类型的
                     if (contentType.split("/")[0].equals("text")){
