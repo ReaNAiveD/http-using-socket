@@ -20,7 +20,7 @@ class Command {
      *
      * @return command的合法性
      */
-    boolean isValid() {
+    boolean run() {
 
         String[] array;
         switch (State.input) {
@@ -42,7 +42,7 @@ class Command {
                 } else if (State.SEND_COMMAND.equals(command) && State.tempConnection != null) {
                     State.tempConnection.sendAndReceive();
                     State.input = Input.INIT;
-                } else if (command.matches(State.PERSISTENT_REGEX) && Integer.valueOf(command) < State.persistentConnections.size()) {
+                } else if (command.matches(State.PERSISTENT_REGEX) && State.persistentConnections.keySet().contains(Integer.valueOf(command))) {
                     State.tempConnection = State.persistentConnections.get(Integer.valueOf(command));
                     System.out.println("client <<INFO>> : Choose the persistent connection " + Integer.valueOf(command) + ".");
                     State.input = Input.PERSISTENT;

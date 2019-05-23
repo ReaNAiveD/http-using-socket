@@ -1,8 +1,6 @@
 package client;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * 状态类
@@ -29,7 +27,7 @@ class State {
     static String host = "127.0.0.1";
     static int port = 8080;
     static Connection tempConnection;
-    static List<Connection> persistentConnections = new ArrayList<>();
+    static HashMap<Integer, Connection> persistentConnections = new HashMap<>();
 
     /**
      * todo
@@ -46,7 +44,9 @@ class State {
                 if (tempConnection != null) {
                     System.out.println("client <<TIP>> : \"send\" to send the request.");
                 }
-                for (int i = 0; i < persistentConnections.size(); i++) {
+                TreeSet<Integer> set = new TreeSet<>(Comparator.reverseOrder());
+                set.addAll(State.persistentConnections.keySet());
+                for (Integer i: set) {
                     System.out.println("client <<TIP>> : \"" + i + "\" to choose the persistent connection " + i + ".");
                 }
                 break;
@@ -88,8 +88,8 @@ class State {
         if (tempConnection != null) {
             tempConnection.close();
         }
-        for (Connection connection : persistentConnections) {
-            connection.close();
+        for (Integer key : persistentConnections.keySet()) {
+            persistentConnections.get(key).close();
         }
         System.out.println("client <<INFO>> : QUIT.");
         quit = true;

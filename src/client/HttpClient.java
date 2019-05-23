@@ -17,7 +17,7 @@ public class HttpClient {
                 State.suggest();
                 BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
                 String s = br.readLine();
-                if (!new Command(s).isValid()) {
+                if (!new Command(s).run()) {
                     System.out.println("client <<WARNING>> : Invalid command, please enter a new command.");
                 }
             } while (!State.quit);

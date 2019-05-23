@@ -24,6 +24,9 @@ import java.util.TimeZone;
  */
 class Connection {
 
+    private static int number = 0;
+    private int id;
+
     private Socket socket;
     private Sender sender;
     private Receiver receiver;
@@ -61,7 +64,7 @@ class Connection {
         try {
             responseMessage = ResponseMessage.parse(receiver.receive());
             //根据状态码处理
-            if (responseMessage.getStatusCode().equals("200")) {
+            if ("200".equals(responseMessage.getStatusCode())) {
                 if (responseMessage.getHeaderLine("Content-Type").split("/")[0].equals("text")) {
                     System.out.println(responseMessage.getEntityBody());
                 } else {
@@ -84,7 +87,7 @@ class Connection {
                             outputStream.write(b);
                             outputStream.flush();
                             outputStream.close();
-                            System.out.println("Client <<INFO>> : Receive a resources. Explore it in " + storeUrl);
+                            System.out.println("Client <<INFO>> : Receive a resource. Explore it in " + storeUrl);
                             break;
                         }
                     }
@@ -113,11 +116,14 @@ class Connection {
             System.err.println("存储目录出现问题！");
         }
         if (isPersistent()) {
-            if (!State.persistentConnections.contains(this)) {
-                State.persistentConnections.add(this);
+            if (!State.persistentConnections.values().contains(this)) {
+                Connection.number++;
+                id = Connection.number;
+                State.persistentConnections.put(number, this);
             }
         } else {
-            State.persistentConnections.remove(this);
+            State.tempConnection = null;
+            State.persistentConnections.remove(id);
             close();
             System.out.println();
             System.out.println("Client <<INFO>> : Close a connection.");
