@@ -13,5 +13,26 @@ get请求成功后，如果是非文本类型的文件，会存储在clientResou
     1.1
     host localhost
     
-    a
+    e
+    send
+    
+## 如何post文件
+
+设计上假设resources目录是http服务器的资源目录，clientResources是客户端的资源目录。
+
+post请求核心在于设置content内容。输入b选择传输文件，然后输入文件相对于clientResources的路径。
+
+如果请求未设置Content-Type，那么post请求会根据资源默认设置Content-Type。
+
+post单行文本时默认设置Content-Type为text/plain。
+
+例：
+
+    post
+    /hello
+    1.1
+    host localhost
+    
+    b
+    /DeepColor.png
     send
