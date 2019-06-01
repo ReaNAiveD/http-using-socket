@@ -24,7 +24,7 @@ class RequestMessage {
 
     public String getVersion() {return version;}
 
-    public String getHeaderLine(String key) {return headerLines.get(key);}
+    public String getHeaderLine(String key) {return headerLines.getOrDefault(key, null);}
 
     public String getEntityBody() {return entityBody;}
 
@@ -57,7 +57,6 @@ class RequestMessage {
                 }
             }
             entityBody = stringBuilder.toString();
-            print();
         }
         catch (IndexOutOfBoundsException e){
             e.printStackTrace(System.err);

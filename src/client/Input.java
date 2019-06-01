@@ -24,7 +24,11 @@ enum Input {
     PERSISTENT,
     //输入header后的状态，接下来可以输入“q”返回INIT状态，输入header，输入空行
     HEADER,
-    //输入空行后的状态，接下来可以输入“q”返回INIT状态，输入数字选择body
-    BODY
+    //输入空行后的状态，接下来可以输入“q”返回INIT状态，输入数字选择body类型
+    BODYTYPE,
+    //输入body类型后的输入文本内容
+    BODY,
+    //输入body类型后的输入文件路径
+    BODYPATH
 
 }

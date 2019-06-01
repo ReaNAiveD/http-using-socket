@@ -33,7 +33,10 @@ class Sender {
             System.out.println("================================");
             System.out.println(request);
             System.out.println("================================");
-            out.writeUTF(request);
+            byte[] requestBytes = request.getBytes();
+            out.writeInt(requestBytes.length);
+            out.write(requestBytes);
+            //out.writeUTF(request);
         } catch (Exception e) {
             e.printStackTrace();
         }

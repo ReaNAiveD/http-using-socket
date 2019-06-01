@@ -16,9 +16,9 @@ class State {
     static final String SEND_COMMAND = "send";
     static final String URL_REGEX = "^/?.*";
     static final String PERSISTENT_REGEX = "^[0-9]+$";
+    static final String EMPTY_BODY = "e";
     static final String TEXT_BODY = "a";
-    static final String MUSIC_BODY = "b";
-    static final String PICTURE_BODY = "c";
+    static final String FILE_BODY = "b";
     static final List<String> VALID_VERSION = Arrays.asList("1.0", "1.1");
     static final int HEADER_LENGTH = 2;
 
@@ -69,11 +69,18 @@ class State {
                 System.out.println("client <<TIP>> : key and value to set header.");
                 System.out.println("client <<TIP>> : blank to stop setting header.");
                 break;
-            case BODY:
+            case BODYTYPE:
                 System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
-                System.out.println("client <<TIP>> : \"a\" to set body to text");
-                System.out.println("client <<TIP>> : \"b\" to set body to music");
-                System.out.println("client <<TIP>> : \"c\" to set body to picture");
+                System.out.println("client <<TIP>> : \"e\" to set body empty");
+                System.out.println("client <<TIP>> : \"a\" to set body to one-line text");
+                System.out.println("client <<TIP>> : \"b\" to set body to file");
+                break;
+            case BODY:
+                System.out.println("client <<TIP>> : input body content and enter to submit. ");
+                break;
+            case BODYPATH:
+                System.out.println("client <<TIP>> : input client resource path. ");
+                System.out.println("client <<TIP>> : e.g. /hello.txt ");
                 break;
             default:
                 break;

@@ -1,5 +1,8 @@
 package server;
 
+import org.apache.tika.mime.MimeType;
+import org.apache.tika.mime.MimeTypeException;
+import org.apache.tika.mime.MimeTypes;
 import server.RequestMessage;
 import server.ResponseMessage;
 import server.exception.ResolveException;
@@ -9,7 +12,12 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * 连接线程类
@@ -57,6 +65,10 @@ class ConnectionHandler extends Thread {
             e.printStackTrace();
             responseMessage = new ResponseMessage("1.1", "400", "Bad Request");
             sender.send(responseMessage.getResponse());
+        } catch (Exception e){
+            e.printStackTrace();
+            responseMessage = new ResponseMessage("1.1", "500", "Internal Server Error");
+            sender.send(responseMessage.getResponse());
         }
     }
 
@@ -91,6 +103,60 @@ class ConnectionHandler extends Thread {
             }
             else {
                 responseMessage = new ResponseMessage("1.1", "404", "Not Found");
+            }
+        }
+
+        if (requestMessage.getMethod().equals("POST")){
+            if(requestMessage.getHeaderLine("Content-Type") == null){
+                System.out.println("Server <<INFO>> : Receive a POST request to URL " + requestMessage.getUrl() + " without Content-Type. Content: ");
+                System.out.println(requestMessage.getEntityBody());
+                responseMessage = new ResponseMessage("1.1", "200", "OK");
+            }
+            else {
+                if (requestMessage.getHeaderLine("Content-Type").equals("text")) {
+                    System.out.println("Server <<INFO>> : Receive a POST request which is " + requestMessage.getHeaderLine("Content-Type") + " to URL " + requestMessage.getUrl() + ". Content: ");
+                    System.out.println(requestMessage.getEntityBody());
+                } else {
+                    try {
+                        MimeTypes mimeTypes = MimeTypes.getDefaultMimeTypes();
+                        MimeType type = mimeTypes.forName(requestMessage.getHeaderLine("Content-Type").split(";")[0]);
+                        String extension = type.getExtension();
+
+                        DateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss", Locale.US);
+                        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+                        Date current = new Date();
+                        String timeString = dateFormat.format(current);
+                        for (int i = 0; ; i++) {
+                            String storeUrl = processUrl("/" + timeString + i + extension);
+                            File file = new File(storeUrl);
+                            if (!file.exists()) {
+                                //不存在同名文件时解码并存储
+                                OutputStream outputStream = new FileOutputStream(file);
+                                Base64.Decoder decoder = Base64.getDecoder();
+                                byte[] b = decoder.decode(requestMessage.getEntityBody());
+                                outputStream.write(b);
+                                outputStream.flush();
+                                outputStream.close();
+                                System.out.println("Server <<INFO>> : Receive a POST request to URL " + requestMessage.getUrl() + " with " + requestMessage.getHeaderLine("Content-Type") + ". ");
+                                System.out.println("Server <<INFO>> : Received Resources have been saved to " + storeUrl);
+                                break;
+                            }
+                        }
+                        responseMessage = new ResponseMessage("1.1", "200", "OK");
+                    } catch (MimeTypeException e) {
+                        System.err.println("Server <<EXCEPTION>> : Unsupported MimeType");
+                        responseMessage = new ResponseMessage("1.1", "415", "Unsupported Media Type");
+                    } catch (FileNotFoundException e) {
+                        System.err.println("Server <<EXCEPTION>> : Server Receive Fold Not Exist");
+                        responseMessage = new ResponseMessage("1.1", "500", "Internal Server Error");
+                    } catch (IOException e) {
+                        System.err.println("Server <<EXCEPTION>> : IO EXCEPTION");
+                        responseMessage = new ResponseMessage("1.1", "500", "Internal Server Error");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        responseMessage = new ResponseMessage("1.1", "500", "Internal Server Error");
+                    }
+                }
             }
         }
     }

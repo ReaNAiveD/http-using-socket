@@ -1,7 +1,10 @@
 package server;
 
+import client.utils.InputStreamTool;
+
 import java.io.DataInputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 抽象出来收响应报文的简单类
@@ -29,9 +32,12 @@ class Receiver {
     String receive() {
         String request = null;
         try {
-            request = in.readUTF();
+            int requestLength = in.readInt();
+            byte[] requestBytes = new byte[requestLength];
+            in.readFully(requestBytes);
+            request = new String(requestBytes, StandardCharsets.UTF_8);
             System.out.println();
-            System.out.println("client <<INFO>> : Receive a request");
+            System.out.println("Server <<INFO>> : Receive a request");
             System.out.println("===================================");
             System.out.println(request);
             System.out.println("===================================");

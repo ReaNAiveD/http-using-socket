@@ -31,7 +31,6 @@ class Receiver {
         String response = null;
         try {
             int responseLength = in.readInt();
-            System.out.println("responseLength = " + responseLength);
             byte[] responseBytes = new byte[responseLength];
             in.readFully(responseBytes);
             response = new String(responseBytes, StandardCharsets.UTF_8);

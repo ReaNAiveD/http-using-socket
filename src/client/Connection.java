@@ -65,30 +65,32 @@ class Connection {
             responseMessage = ResponseMessage.parse(receiver.receive());
             //根据状态码处理
             if ("200".equals(responseMessage.getStatusCode())) {
-                if (responseMessage.getHeaderLine("Content-Type").split("/")[0].equals("text")) {
-                    System.out.println(responseMessage.getEntityBody());
-                } else {
-                    //计算文件名
-                    MimeTypes allTypes = MimeTypes.getDefaultMimeTypes();
-                    MimeType type = allTypes.forName(responseMessage.getHeaderLine("Content-Type").split(";")[0]);
-                    String extension = type.getExtension();
-                    DateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss", Locale.US);
-                    dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+8"));
-                    Date current = new Date();
-                    String timeString = dateFormat.format(current);
-                    for (int i = 0; ; i++) {
-                        String storeUrl = processUrl("/" + timeString + i + extension);
-                        File file = new File(storeUrl);
-                        if (!file.exists()) {
-                            //不存在同名文件时解码并存储
-                            OutputStream outputStream = new FileOutputStream(file);
-                            Base64.Decoder decoder = Base64.getDecoder();
-                            byte[] b = decoder.decode(responseMessage.getEntityBody());
-                            outputStream.write(b);
-                            outputStream.flush();
-                            outputStream.close();
-                            System.out.println("Client <<INFO>> : Receive a resource. Explore it in " + storeUrl);
-                            break;
+                if (!(responseMessage.getHeaderLine("Content-Type") == null)) {
+                    if (responseMessage.getHeaderLine("Content-Type").split("/")[0].equals("text")) {
+                        System.out.println(responseMessage.getEntityBody());
+                    } else {
+                        //计算文件名
+                        MimeTypes allTypes = MimeTypes.getDefaultMimeTypes();
+                        MimeType type = allTypes.forName(responseMessage.getHeaderLine("Content-Type").split(";")[0]);
+                        String extension = type.getExtension();
+                        DateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss", Locale.US);
+                        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+                        Date current = new Date();
+                        String timeString = dateFormat.format(current);
+                        for (int i = 0; ; i++) {
+                            String storeUrl = processUrl("/" + timeString + i + extension);
+                            File file = new File(storeUrl);
+                            if (!file.exists()) {
+                                //不存在同名文件时解码并存储
+                                OutputStream outputStream = new FileOutputStream(file);
+                                Base64.Decoder decoder = Base64.getDecoder();
+                                byte[] b = decoder.decode(responseMessage.getEntityBody());
+                                outputStream.write(b);
+                                outputStream.flush();
+                                outputStream.close();
+                                System.out.println("Client <<INFO>> : Receive a resource. Explore it in " + storeUrl);
+                                break;
+                            }
                         }
                     }
                 }
