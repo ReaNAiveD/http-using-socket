@@ -1,9 +1,9 @@
 package client;
 
-import server.exception.ResolveException;
+
+import client.exception.ResolveException;
 
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * 响应报文类
@@ -18,7 +18,7 @@ class ResponseMessage {
     private HashMap<String, String> headerLines;
     private String entityBody;
 
-    ResponseMessage(){
+    ResponseMessage() {
         headerLines = new HashMap<String, String>();
     }
 
@@ -39,7 +39,7 @@ class ResponseMessage {
             headLength += reasonPhrase.length() + 2;
             int lineCount = 1;
             headLength += 2;
-            for(; lineCount < httpLines.length && !httpLines[lineCount].equals(""); lineCount++){
+            for (; lineCount < httpLines.length && !httpLines[lineCount].equals(""); lineCount++) {
                 headerLines.put(httpLines[lineCount].split(": ", 2)[0], httpLines[lineCount].split(": ", 2)[1]);
                 headLength += httpLines[lineCount].length() + 2;
             }
@@ -51,13 +51,13 @@ class ResponseMessage {
 ////            }
 ////            entityBody = stringBuilder.toString();
             entityBody = response.substring(headLength);
-        } catch (IndexOutOfBoundsException e){
+        } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
             throw new ResolveException();
         }
     }
 
-    public static ResponseMessage parse(String response) throws ResolveException{
+    public static ResponseMessage parse(String response) throws ResolveException {
         ResponseMessage result = new ResponseMessage();
         result.setByResponse(response);
         return result;

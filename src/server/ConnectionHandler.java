@@ -1,12 +1,10 @@
 package server;
 
+import server.exception.ResolveException;
+import server.utils.InputStreamTool;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
-import server.RequestMessage;
-import server.ResponseMessage;
-import server.exception.ResolveException;
-import server.utils.InputStreamTool;
 
 import java.io.*;
 import java.net.Socket;
@@ -77,7 +75,7 @@ class ConnectionHandler extends Thread {
      * 处理请求
      */
     private void dealWithRequest() {
-        if (requestMessage.getMethod().equals("GET")){
+        if (requestMessage.getMethod().equals("TYPE")){
             File requestedFile = new File(processUrl(requestMessage.getUrl()));
             if (requestedFile.exists()){
                 try {
@@ -108,13 +106,13 @@ class ConnectionHandler extends Thread {
 
         if (requestMessage.getMethod().equals("POST")){
             if(requestMessage.getHeaderLine("Content-Type") == null){
-                System.out.println("Server <<INFO>> : Receive a POST request to URL " + requestMessage.getUrl() + " without Content-Type. Content: ");
+                System.out.println("Server <<INFO>> : Receive a POST request to PATH " + requestMessage.getUrl() + " without Content-Type. Content: ");
                 System.out.println(requestMessage.getEntityBody());
                 responseMessage = new ResponseMessage("1.1", "200", "OK");
             }
             else {
                 if (requestMessage.getHeaderLine("Content-Type").equals("text")) {
-                    System.out.println("Server <<INFO>> : Receive a POST request which is " + requestMessage.getHeaderLine("Content-Type") + " to URL " + requestMessage.getUrl() + ". Content: ");
+                    System.out.println("Server <<INFO>> : Receive a POST request which is " + requestMessage.getHeaderLine("Content-Type") + " to PATH " + requestMessage.getUrl() + ". Content: ");
                     System.out.println(requestMessage.getEntityBody());
                 } else {
                     try {
@@ -137,7 +135,7 @@ class ConnectionHandler extends Thread {
                                 outputStream.write(b);
                                 outputStream.flush();
                                 outputStream.close();
-                                System.out.println("Server <<INFO>> : Receive a POST request to URL " + requestMessage.getUrl() + " with " + requestMessage.getHeaderLine("Content-Type") + ". ");
+                                System.out.println("Server <<INFO>> : Receive a POST request to PATH " + requestMessage.getUrl() + " with " + requestMessage.getHeaderLine("Content-Type") + ". ");
                                 System.out.println("Server <<INFO>> : Received Resources have been saved to " + storeUrl);
                                 break;
                             }

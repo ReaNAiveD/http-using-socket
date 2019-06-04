@@ -1,10 +1,10 @@
 package client;
 
+import client.exception.ResolveException;
 import client.exception.ResourceStoreException;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
-import server.exception.ResolveException;
 
 import java.io.*;
 import java.net.Socket;
@@ -94,26 +94,25 @@ class Connection {
                         }
                     }
                 }
-            }
-            else {
+            } else {
                 System.err.println(responseMessage.getStatusCode() + " " + responseMessage.getReasonPhrase());
             }
-        }catch (ResolveException e){
+        } catch (ResolveException e) {
             e.printStackTrace();
             System.err.println("客户端解析错误！");
-        }catch (MimeTypeException e){
+        } catch (MimeTypeException e) {
             e.printStackTrace();
             System.err.println("MIME类型不受支持！");
-        }catch (FileNotFoundException e){
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
             System.err.println("文件夹不存在！");
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             System.err.println("文件写入发生错误！");
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
             System.err.println("内容解析失败！");
-        }catch (ResourceStoreException e){
+        } catch (ResourceStoreException e) {
             e.printStackTrace();
             System.err.println("存储目录出现问题！");
         }
@@ -152,17 +151,15 @@ class Connection {
         return "keep-alive".equals(requestMessage.getHeaderLines().get("Connection"));
     }
 
-    private String processUrl(String originUrl) throws ResourceStoreException{
+    private String processUrl(String originUrl) throws ResourceStoreException {
         File dire = new File("clientResources");
         if (!dire.exists()) {
             if (!dire.mkdir()) {
                 throw new ResourceStoreException();
             }
-        }
-        else if (dire.exists() && dire.isDirectory()){
+        } else if (dire.exists() && dire.isDirectory()) {
             return "clientResources" + originUrl;
-        }
-        else{
+        } else {
             throw new ResourceStoreException();
         }
         return "clientResources" + originUrl;

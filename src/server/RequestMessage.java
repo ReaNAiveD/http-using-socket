@@ -11,7 +11,7 @@ import java.util.HashMap;
  */
 class RequestMessage {
 
-    //GET,POST or other(Capital)
+    //TYPE,POST or other(Capital)
     private String method;
     private String url;
     private String version;
@@ -39,7 +39,9 @@ class RequestMessage {
         int lineCount = array.length;
         try {
             String[] firstLine = array[0].split(" ");
-            if (firstLine.length < 3) throw new ResolveException();
+            if (firstLine.length < 3) {
+                throw new ResolveException();
+            }
             method = firstLine[0];
             url = firstLine[1];
             version = firstLine[2].split("/")[1];
@@ -53,7 +55,9 @@ class RequestMessage {
             if (line < lineCount) {
                 for (; line < lineCount; line++) {
                     stringBuilder.append(array[line]);
-                    if (line != lineCount - 1) stringBuilder.append("\r\n");
+                    if (line != lineCount - 1) {
+                        stringBuilder.append("\r\n");
+                    }
                 }
             }
             entityBody = stringBuilder.toString();

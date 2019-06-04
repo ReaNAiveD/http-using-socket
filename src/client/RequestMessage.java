@@ -24,7 +24,7 @@ class RequestMessage {
 
     void setUrl(String url) {
         this.url = url;
-        System.out.println("client <<INFO>> : Set the request URL to " + url + ".");
+        System.out.println("client <<INFO>> : Set the request PATH to " + url + ".");
     }
 
     void setVersion(String version) {
@@ -56,7 +56,7 @@ class RequestMessage {
     void addHeaderLine(String key, String value) {
         headerLines.put(key, value);
         System.out.println("client <<INFO>> : Set the \"" + key + "\" to \"" + value + "\" in header.");
-        State.input = Input.HEADER;
+        State.input = Input.KEY_VALUE;
     }
 
     void setEntityBody(String entityBody) {
