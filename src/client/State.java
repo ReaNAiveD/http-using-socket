@@ -16,9 +16,15 @@ class State {
     static final String SEND_COMMAND = "send";
     static final String PATH_REGEX = "\\.*/?.*$";
     static final String PERSISTENT_REGEX = "^[0-9]+$";
+    static final String GET_METHOD = "GET";
+    static final String POST_METHOD = "POST";
+    static final String DEFAULT_PATH = "127.0.0.1";
+    static final String HOST_HEADER = "Host";
     static final String EMPTY_BODY = "e";
     static final String TEXT_BODY = "a";
     static final String FILE_BODY = "b";
+    static final String SPLIT_FLAG = "/";
+    static final String SPACE_FLAG = " ";
     static final List<String> VALID_VERSION = Arrays.asList("1.0", "1.1");
     static final int HEADER_LENGTH = 2;
 
@@ -50,7 +56,7 @@ class State {
                     System.out.println("client <<TIP>> : \"" + i + "\" to choose the persistent connection " + i + ".");
                 }
                 break;
-            case TYPE:
+            case METHOD:
                 System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
                 System.out.println("client <<TIP>> : path to set path.");
                 break;
@@ -58,17 +64,12 @@ class State {
                 System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
                 System.out.println("client <<TIP>> : \"1.0\" or \"1.1\" to set http version.");
                 break;
-            case VERSION:
-
-            case RELATIVE:
-                System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
-                System.out.println("client <<TIP>> : key and value to set header.");
-                break;
             case PERSISTENT:
                 System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
                 System.out.println("client <<TIP>> : relative path to set relative path.");
                 break;
-
+            case VERSION:
+            case RELATIVE:
             case KEY_VALUE:
                 System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
                 System.out.println("client <<TIP>> : key and value to set header.");

@@ -12,19 +12,23 @@ import java.util.Map;
 class RequestMessage {
 
     private String method;
-    private String url;
+    private String path;
     private String version;
     private HashMap<String, String> headerLines;
     private String entityBody;
+
+    String getMethod() {
+        return method;
+    }
 
     void setMethod(String method) {
         this.method = method;
         System.out.println("client <<INFO>> : Set the request method to " + method + ".");
     }
 
-    void setUrl(String url) {
-        this.url = url;
-        System.out.println("client <<INFO>> : Set the request PATH to " + url + ".");
+    void setPath(String path) {
+        this.path = path;
+        System.out.println("client <<INFO>> : Set the request path to \"" + path + "\".");
     }
 
     void setVersion(String version) {
@@ -74,7 +78,7 @@ class RequestMessage {
         //请求行
         requestBuilder.append(method);
         requestBuilder.append(' ');
-        requestBuilder.append(url);
+        requestBuilder.append(path);
         requestBuilder.append(' ');
         requestBuilder.append("HTTP/");
         requestBuilder.append(version);

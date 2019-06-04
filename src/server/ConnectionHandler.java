@@ -75,7 +75,7 @@ class ConnectionHandler extends Thread {
      * 处理请求
      */
     private void dealWithRequest() {
-        if (requestMessage.getMethod().equals("TYPE")){
+        if (requestMessage.getMethod().equals("METHOD")){
             File requestedFile = new File(processUrl(requestMessage.getUrl()));
             if (requestedFile.exists()){
                 try {

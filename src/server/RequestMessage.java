@@ -11,7 +11,7 @@ import java.util.HashMap;
  */
 class RequestMessage {
 
-    //TYPE,POST or other(Capital)
+    //METHOD,POST or other(Capital)
     private String method;
     private String url;
     private String version;

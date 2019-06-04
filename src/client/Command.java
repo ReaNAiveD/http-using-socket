@@ -33,18 +33,21 @@ class Command {
 
             //初始输入状态
             case INIT:
+                if ("".equals(command)) {
+                    break;
+                }
                 if (State.QUIT_COMMAND.equals(command)) {
                     State.quit();
                 } else if (State.SHOW_COMMAND.equals(command)) {
                     State.show();
                 } else if (State.GET_COMMAND.equals(command)) {
                     State.tempConnection = new Connection();
-                    State.tempConnection.getRequestMessage().setMethod("GET");
-                    State.input = Input.TYPE;
+                    State.tempConnection.getRequestMessage().setMethod(State.GET_METHOD);
+                    State.input = Input.METHOD;
                 } else if (State.POST_COMMAND.equals(command)) {
                     State.tempConnection = new Connection();
-                    State.tempConnection.getRequestMessage().setMethod("POST");
-                    State.input = Input.TYPE;
+                    State.tempConnection.getRequestMessage().setMethod(State.POST_METHOD);
+                    State.input = Input.METHOD;
                 } else if (State.SEND_COMMAND.equals(command) && State.tempConnection != null) {
                     State.tempConnection.sendAndReceive();
                     State.input = Input.INIT;
@@ -58,19 +61,32 @@ class Command {
                 break;
 
             //输入GET、POST后的状态
-            case TYPE:
+            case METHOD:
+                if ("".equals(command)) {
+                    command = State.DEFAULT_PATH;
+                }
                 if (State.QUIT_COMMAND.equals(command)) {
                     State.abandonEditing();
-                } else if (command.matches(State.PATH_REGEX)) {
-                    State.tempConnection.getRequestMessage().setUrl(command);
+                } else if (command.matches(State.PATH_REGEX) && !command.contains(State.SPACE_FLAG)) {
+                    int index = command.indexOf(State.SPLIT_FLAG);
+                    if (index == -1) {
+                        State.tempConnection.getRequestMessage().initHeaderLine(State.HOST_HEADER, command);
+                        State.tempConnection.getRequestMessage().setPath("");
+                    } else {
+                        State.tempConnection.getRequestMessage().initHeaderLine(State.HOST_HEADER, command.substring(0, index));
+                        State.tempConnection.getRequestMessage().setPath(command.substring(index));
+                    }
                     State.input = Input.PATH;
                 } else {
                     return false;
                 }
                 break;
 
-            //输入URL后的状态
+            //输入path后的状态
             case PATH:
+                if ("".equals(command)) {
+                    command = State.VALID_VERSION.get(1);
+                }
                 if (State.QUIT_COMMAND.equals(command)) {
                     State.abandonEditing();
                 } else if (State.VALID_VERSION.contains(command)) {
@@ -81,33 +97,35 @@ class Command {
                 }
                 break;
 
-            //输入version后的状态
-            case VERSION:
-                array = command.split(" ");
+            //选择长连接后的状态
+            case PERSISTENT:
                 if (State.QUIT_COMMAND.equals(command)) {
                     State.abandonEditing();
-                } else if (Array.getLength(array) == State.HEADER_LENGTH) {
-                    State.tempConnection.getRequestMessage().initHeaderLine(array[0], array[1]);
+                } else if (!command.contains(State.SPACE_FLAG)){
+                    State.tempConnection.getRequestMessage().setPath(command);
+                    State.input = Input.RELATIVE;
                 } else {
                     return false;
                 }
                 break;
 
-            //选择长连接后的状态
-            case PERSISTENT:
-
-            //输入相对地址后的状态
+            //输入version、相对地址、header键值对后的状态
+            case VERSION:
             case RELATIVE:
-
-            //输入header键值对后的状态
             case KEY_VALUE:
-                array = command.split(" ");
+                array = command.split(State.SPACE_FLAG);
                 if (State.QUIT_COMMAND.equals(command)) {
                     State.abandonEditing();
                 } else if (Array.getLength(array) == State.HEADER_LENGTH) {
                     State.tempConnection.getRequestMessage().addHeaderLine(array[0], array[1]);
+                    State.input = Input.KEY_VALUE;
                 } else if ("".equals(command)) {
                     System.out.println("client <<INFO>> : Stop editing the header.");
+                    if (State.GET_METHOD.equals(State.tempConnection.getRequestMessage().getMethod())) {
+                        State.tempConnection.getRequestMessage().setEntityBody("");
+                        System.out.println("client <<INFO>> : Stop editing the body.");
+                        State.input = Input.INIT;
+                    }
                     State.input = Input.HEADER;
                 } else {
                     return false;
@@ -116,16 +134,18 @@ class Command {
 
             //输入header空行后的状态
             case HEADER:
+                if ("".equals(command)) {
+                    command = State.EMPTY_BODY;
+                }
                 if (State.QUIT_COMMAND.equals(command)) {
                     State.abandonEditing();
                 } else if (State.EMPTY_BODY.equals(command)) {
                     State.tempConnection.getRequestMessage().setEntityBody("");
+                    System.out.println("client <<INFO>> : Stop editing the body.");
                     State.input = Input.INIT;
                 } else if (State.TEXT_BODY.equals(command)) {
-                    //State.tempConnection.getRequestMessage().setEntityBody("HEADER-TODO-A");
                     State.input = Input.BODY_TEXT;
                 } else if (State.FILE_BODY.equals(command)) {
-                    //State.tempConnection.getRequestMessage().setEntityBody("HEADER-TODO-B");
                     State.input = Input.BODY_PATH;
                 } else {
                     return false;
@@ -134,39 +154,50 @@ class Command {
 
             //选择文本类型后的状态
             case BODY_TEXT:
-                State.tempConnection.getRequestMessage().setEntityBody(command);
-                State.input = Input.INIT;
+                if (State.QUIT_COMMAND.equals(command)) {
+                    State.abandonEditing();
+                } else if (!"".equals(command)) {
+                    State.tempConnection.getRequestMessage().setEntityBody(command);
+                    State.input = Input.INIT;
+                } else {
+                    return false;
+                }
                 break;
 
             //选择其他类型后的状态
             case BODY_PATH:
+                if ("".equals(command)) {
+                    command = "/hello.txt";
+                }
                 if (State.QUIT_COMMAND.equals(command)) {
                     State.abandonEditing();
                     break;
-                }
-                File uploadFile = new File(processFilePath(command));
-                try {
-                    FileInputStream inputStream = new FileInputStream(uploadFile);
-                    byte[] data = InputStreamTool.readAllBytes(inputStream);
-                    if (!State.tempConnection.getRequestMessage().getHeaderLines().containsKey("Content-Type")) {
-                        State.tempConnection.getRequestMessage().addHeaderLine("Content-Type", Files.probeContentType(uploadFile.toPath()));
+                } else if (command.startsWith(State.SPLIT_FLAG)) {
+                    File uploadFile = new File(processFilePath(command));
+                    try {
+                        FileInputStream inputStream = new FileInputStream(uploadFile);
+                        byte[] data = InputStreamTool.readAllBytes(inputStream);
+                        if (!State.tempConnection.getRequestMessage().getHeaderLines().containsKey("Content-Type")) {
+                            State.tempConnection.getRequestMessage().addHeaderLine("Content-Type", Files.probeContentType(uploadFile.toPath()));
+                        }
+                        if (State.tempConnection.getRequestMessage().getHeaderLines().get("Content-Type").split("/")[0].equals("text")) {
+                            State.tempConnection.getRequestMessage().setEntityBody(new String(data, StandardCharsets.UTF_8));
+                        } else {
+                            Base64.Encoder encoder = Base64.getEncoder();
+                            State.tempConnection.getRequestMessage().setEntityBody(encoder.encodeToString(data));
+                        }
+                        State.input = Input.INIT;
+                        break;
+                    } catch (FileNotFoundException e) {
+                        System.out.println("client <<ERROR>> : File Not Found.");
+                        return false;
+                    } catch (IOException e) {
+                        System.out.println("client <<ERROR>> : IO EXCEPTION.");
+                        e.printStackTrace();
                     }
-                    if (State.tempConnection.getRequestMessage().getHeaderLines().get("Content-Type").split("/")[0].equals("text")) {
-                        State.tempConnection.getRequestMessage().setEntityBody(new String(data, StandardCharsets.UTF_8));
-                    } else {
-                        Base64.Encoder encoder = Base64.getEncoder();
-                        State.tempConnection.getRequestMessage().setEntityBody(encoder.encodeToString(data));
-                    }
-                    State.input = Input.INIT;
-                    break;
-                } catch (FileNotFoundException e) {
-                    System.out.println("client <<ERROR>> : File Not Found.");
+                } else {
                     return false;
-                } catch (IOException e) {
-                    System.out.println("client <<ERROR>> : IO EXCEPTION.");
-                    e.printStackTrace();
                 }
-
             default:
                 return false;
         }
