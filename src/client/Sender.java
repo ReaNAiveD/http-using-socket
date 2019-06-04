@@ -36,7 +36,6 @@ class Sender {
             byte[] requestBytes = request.getBytes();
             out.writeInt(requestBytes.length);
             out.write(requestBytes);
-            //out.writeUTF(request);
         } catch (Exception e) {
             e.printStackTrace();
         }

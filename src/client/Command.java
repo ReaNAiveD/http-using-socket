@@ -101,7 +101,7 @@ class Command {
             case PERSISTENT:
                 if (State.QUIT_COMMAND.equals(command)) {
                     State.abandonEditing();
-                } else if (!command.contains(State.SPACE_FLAG)){
+                } else if (!command.contains(State.SPACE_FLAG)) {
                     State.tempConnection.getRequestMessage().setPath(command);
                     State.input = Input.RELATIVE;
                 } else {
@@ -125,8 +125,9 @@ class Command {
                         State.tempConnection.getRequestMessage().setEntityBody("");
                         System.out.println("client <<INFO>> : Stop editing the body.");
                         State.input = Input.INIT;
+                    } else {
+                        State.input = Input.HEADER;
                     }
-                    State.input = Input.HEADER;
                 } else {
                     return false;
                 }
@@ -171,16 +172,15 @@ class Command {
                 }
                 if (State.QUIT_COMMAND.equals(command)) {
                     State.abandonEditing();
-                    break;
                 } else if (command.startsWith(State.SPLIT_FLAG)) {
                     File uploadFile = new File(processFilePath(command));
                     try {
                         FileInputStream inputStream = new FileInputStream(uploadFile);
                         byte[] data = InputStreamTool.readAllBytes(inputStream);
-                        if (!State.tempConnection.getRequestMessage().getHeaderLines().containsKey("Content-Type")) {
-                            State.tempConnection.getRequestMessage().addHeaderLine("Content-Type", Files.probeContentType(uploadFile.toPath()));
+                        if (!State.tempConnection.getRequestMessage().getHeaderLines().containsKey(State.TYPE_HEADER)) {
+                            State.tempConnection.getRequestMessage().addHeaderLine(State.TYPE_HEADER, Files.probeContentType(uploadFile.toPath()));
                         }
-                        if (State.tempConnection.getRequestMessage().getHeaderLines().get("Content-Type").split("/")[0].equals("text")) {
+                        if (State.tempConnection.getRequestMessage().getHeaderLines().get(State.TYPE_HEADER).split(State.SPLIT_FLAG)[0].equals(State.TEXT_TYPE)) {
                             State.tempConnection.getRequestMessage().setEntityBody(new String(data, StandardCharsets.UTF_8));
                         } else {
                             Base64.Encoder encoder = Base64.getEncoder();
@@ -190,14 +190,18 @@ class Command {
                         break;
                     } catch (FileNotFoundException e) {
                         System.out.println("client <<ERROR>> : File Not Found.");
+                        e.printStackTrace();
                         return false;
                     } catch (IOException e) {
-                        System.out.println("client <<ERROR>> : IO EXCEPTION.");
+                        System.out.println("client <<ERROR>> : IO Exception.");
                         e.printStackTrace();
+                        return false;
                     }
                 } else {
                     return false;
                 }
+                break;
+
             default:
                 return false;
         }

@@ -20,6 +20,8 @@ class State {
     static final String POST_METHOD = "POST";
     static final String DEFAULT_PATH = "127.0.0.1";
     static final String HOST_HEADER = "Host";
+    static final String TYPE_HEADER = "Content-Type";
+    static final String TEXT_TYPE = "text";
     static final String EMPTY_BODY = "e";
     static final String TEXT_BODY = "a";
     static final String FILE_BODY = "b";
@@ -47,6 +49,7 @@ class State {
                 System.out.println("client <<TIP>> : \"s\" to show information.");
                 System.out.println("client <<TIP>> : \"get\" to create a GET connection.");
                 System.out.println("client <<TIP>> : \"post\" to create a POST connection.");
+                System.out.println("client <<TIP>> : default value  \"\" to refresh.");
                 if (tempConnection != null) {
                     System.out.println("client <<TIP>> : \"send\" to send the request.");
                 }
@@ -59,10 +62,12 @@ class State {
             case METHOD:
                 System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
                 System.out.println("client <<TIP>> : path to set path.");
+                System.out.println("client <<TIP>> : default value  \"127.0.0.1\" to set path.");
                 break;
             case PATH:
                 System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
                 System.out.println("client <<TIP>> : \"1.0\" or \"1.1\" to set http version.");
+                System.out.println("client <<TIP>> : default value  \"1.1\" to set version.");
                 break;
             case PERSISTENT:
                 System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
@@ -80,6 +85,7 @@ class State {
                 System.out.println("client <<TIP>> : \"e\" to set body empty.");
                 System.out.println("client <<TIP>> : \"a\" to set body to one-line text.");
                 System.out.println("client <<TIP>> : \"b\" to set body to file.");
+                System.out.println("client <<TIP>> : default value  \"e\" to set empty body.");
                 break;
             case BODY_TEXT:
                 System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
@@ -88,7 +94,7 @@ class State {
             case BODY_PATH:
                 System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
                 System.out.println("client <<TIP>> : file path to set file.");
-                System.out.println("client <<TIP>> : e.g. /hello.txt ");
+                System.out.println("client <<TIP>> : default value  \"/hello.txt\" to set file.");
                 break;
             default:
                 break;

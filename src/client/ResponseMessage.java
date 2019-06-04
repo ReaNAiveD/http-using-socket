@@ -19,14 +19,14 @@ class ResponseMessage {
     private String entityBody;
 
     ResponseMessage() {
-        headerLines = new HashMap<String, String>();
+        headerLines = new HashMap<>();
     }
 
     /**
      * TODO
      * 将字符串转化到属性
      */
-    void setByResponse(String response) throws ResolveException {
+    private void setByResponse(String response) throws ResolveException {
         String[] httpLines = response.split("\r\n");
         int headLength = 0;
         try {
@@ -39,7 +39,7 @@ class ResponseMessage {
             headLength += reasonPhrase.length() + 2;
             int lineCount = 1;
             headLength += 2;
-            for (; lineCount < httpLines.length && !httpLines[lineCount].equals(""); lineCount++) {
+            for (; lineCount < httpLines.length && !"".equals(httpLines[lineCount]); lineCount++) {
                 headerLines.put(httpLines[lineCount].split(": ", 2)[0], httpLines[lineCount].split(": ", 2)[1]);
                 headLength += httpLines[lineCount].length() + 2;
             }
@@ -57,7 +57,7 @@ class ResponseMessage {
         }
     }
 
-    public static ResponseMessage parse(String response) throws ResolveException {
+    static ResponseMessage parse(String response) throws ResolveException {
         ResponseMessage result = new ResponseMessage();
         result.setByResponse(response);
         return result;
@@ -67,19 +67,20 @@ class ResponseMessage {
         return version;
     }
 
-    public String getStatusCode() {
+    String getStatusCode() {
         return statusCode;
     }
 
-    public String getReasonPhrase() {
+    String getReasonPhrase() {
         return reasonPhrase;
     }
 
-    public String getHeaderLine(String key) {
+    String getHeaderLine(String key) {
         return headerLines.get(key);
     }
 
-    public String getEntityBody() {
+    String getEntityBody() {
         return entityBody;
     }
+
 }
