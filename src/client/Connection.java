@@ -151,7 +151,7 @@ class Connection {
         if (requestMessage.getHeaderLines().containsKey(State.CONNECTION_HEADER)) {
             return State.PERSISTENT_HEADER.equals(requestMessage.getHeaderLines().get(State.CONNECTION_HEADER));
         } else {
-            return responseMessage.getVersion().equals(State.VALID_VERSION.get(1));
+            return requestMessage.getVersion().equals(State.VALID_VERSION.get(1));
         }
     }
 

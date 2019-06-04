@@ -31,6 +31,10 @@ class RequestMessage {
         System.out.println("client <<INFO>> : Set the request path to \"" + path + "\".");
     }
 
+    String getVersion() {
+        return version;
+    }
+
     void setVersion(String version) {
         this.version = version;
         System.out.println("client <<INFO>> : Set the request version to HTTP/" + version + ".");
