@@ -62,11 +62,11 @@ class Connection {
         }
         sender.send(requestMessage.getRequest());
         try {
-            responseMessage = ResponseMessage.parse(receiver.receive());
+            responseMessage.setByResponse(receiver.receive());
             //根据状态码处理
             if ("200".equals(responseMessage.getStatusCode())) {
-                if (!(responseMessage.getHeaderLine("Content-Type") == null)) {
-                    if (responseMessage.getHeaderLine("Content-Type").split("/")[0].equals("text")) {
+                if (responseMessage.getHeaderLine(State.TYPE_HEADER) != null) {
+                    if (State.TEXT_TYPE.equals(responseMessage.getHeaderLine(State.TYPE_HEADER).split(State.SPLIT_FLAG)[0])) {
                         System.out.println(responseMessage.getEntityBody());
                     } else {
                         //计算文件名
@@ -148,7 +148,11 @@ class Connection {
      * @return 当前连接是否为长连接
      */
     private boolean isPersistent() {
-        return "keep-alive".equals(requestMessage.getHeaderLines().get("Connection"));
+        if (requestMessage.getHeaderLines().containsKey(State.CONNECTION_HEADER)) {
+            return State.PERSISTENT_HEADER.equals(requestMessage.getHeaderLines().get(State.CONNECTION_HEADER));
+        } else {
+            return responseMessage.getVersion().equals(State.VALID_VERSION.get(1));
+        }
     }
 
     private String processUrl(String originUrl) throws ResourceStoreException {
@@ -164,4 +168,5 @@ class Connection {
         }
         return "clientResources" + originUrl;
     }
+
 }

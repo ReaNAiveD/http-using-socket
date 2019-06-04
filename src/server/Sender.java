@@ -37,7 +37,6 @@ class Sender {
             byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
             out.writeInt(responseBytes.length);
             out.write(responseBytes);
-            //out.writeUTF(response);
             return 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -47,9 +46,10 @@ class Sender {
 
     /**
      * 处理回应
+     *
      * @param response 回应报文
      */
-    void processResponse(String response){
+    void processResponse(String response) {
 
     }
 

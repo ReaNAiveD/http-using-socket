@@ -173,13 +173,11 @@ class Command {
                 if (State.QUIT_COMMAND.equals(command)) {
                     State.abandonEditing();
                 } else if (command.startsWith(State.SPLIT_FLAG)) {
-                    File uploadFile = new File(processFilePath(command));
                     try {
+                        File uploadFile = new File("resources" + command);
                         FileInputStream inputStream = new FileInputStream(uploadFile);
                         byte[] data = InputStreamTool.readAllBytes(inputStream);
-                        if (!State.tempConnection.getRequestMessage().getHeaderLines().containsKey(State.TYPE_HEADER)) {
-                            State.tempConnection.getRequestMessage().addHeaderLine(State.TYPE_HEADER, Files.probeContentType(uploadFile.toPath()));
-                        }
+                        State.tempConnection.getRequestMessage().addHeaderLine(State.TYPE_HEADER, Files.probeContentType(uploadFile.toPath()));
                         if (State.tempConnection.getRequestMessage().getHeaderLines().get(State.TYPE_HEADER).split(State.SPLIT_FLAG)[0].equals(State.TEXT_TYPE)) {
                             State.tempConnection.getRequestMessage().setEntityBody(new String(data, StandardCharsets.UTF_8));
                         } else {
@@ -206,17 +204,6 @@ class Command {
                 return false;
         }
         return true;
-    }
-
-    private String processFilePath(String originFilePath) {
-        if ("".equals(originFilePath)) {
-            return "resources" + getDefaultFilePath();
-        }
-        return "resources" + originFilePath;
-    }
-
-    private String getDefaultFilePath() {
-        return "/hello.txt";
     }
 
 }

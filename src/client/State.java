@@ -21,6 +21,8 @@ class State {
     static final String DEFAULT_PATH = "127.0.0.1";
     static final String HOST_HEADER = "Host";
     static final String TYPE_HEADER = "Content-Type";
+    static final String CONNECTION_HEADER = "Connection";
+    static final String PERSISTENT_HEADER = "keep-alive";
     static final String TEXT_TYPE = "text";
     static final String EMPTY_BODY = "e";
     static final String TEXT_BODY = "a";

@@ -68,7 +68,6 @@ class RequestMessage {
     }
 
     /**
-     * todo
      * 将属性转化到字符串
      *
      * @return 请求的字符串

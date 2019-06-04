@@ -18,15 +18,25 @@ class RequestMessage {
     private HashMap<String, String> headerLines;
     private String entityBody;
 
-    public String getMethod() {return method;}
+    public String getMethod() {
+        return method;
+    }
 
-    public String getUrl() {return url;}
+    public String getUrl() {
+        return url;
+    }
 
-    public String getVersion() {return version;}
+    public String getVersion() {
+        return version;
+    }
 
-    public String getHeaderLine(String key) {return headerLines.getOrDefault(key, null);}
+    public String getHeaderLine(String key) {
+        return headerLines.getOrDefault(key, null);
+    }
 
-    public String getEntityBody() {return entityBody;}
+    public String getEntityBody() {
+        return entityBody;
+    }
 
     /**
      * TODO
@@ -47,7 +57,7 @@ class RequestMessage {
             version = firstLine[2].split("/")[1];
             //寻找头区域
             int line = 1;
-            for(; line < lineCount && !array[line].equals(""); line++){
+            for (; line < lineCount && !array[line].equals(""); line++) {
                 headerLines.put(array[line].split(": ")[0], array[line].split(": ")[1]);
             }
             line++;
@@ -61,8 +71,7 @@ class RequestMessage {
                 }
             }
             entityBody = stringBuilder.toString();
-        }
-        catch (IndexOutOfBoundsException e){
+        } catch (IndexOutOfBoundsException e) {
             e.printStackTrace(System.err);
             throw new ResolveException();
         }
@@ -74,11 +83,11 @@ class RequestMessage {
         return requestMessage;
     }
 
-    public void print(){
+    public void print() {
         System.out.println(method);
         System.out.println(url);
         System.out.println(version);
-        for (String key : headerLines.keySet()){
+        for (String key : headerLines.keySet()) {
             System.out.println(key + ": " + headerLines.get(key));
         }
         System.out.println(entityBody);
