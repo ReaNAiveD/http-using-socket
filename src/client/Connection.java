@@ -1,10 +1,10 @@
 package client;
 
+import client.exception.ResolveException;
 import client.exception.ResourceStoreException;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
-import server.exception.ResolveException;
 
 import java.io.*;
 import java.net.Socket;
@@ -62,11 +62,11 @@ class Connection {
         }
         sender.send(requestMessage.getRequest());
         try {
-            responseMessage = ResponseMessage.parse(receiver.receive());
+            responseMessage.setByResponse(receiver.receive());
             //根据状态码处理
             if ("200".equals(responseMessage.getStatusCode())) {
-                if (!(responseMessage.getHeaderLine("Content-Type") == null)) {
-                    if (responseMessage.getHeaderLine("Content-Type").split("/")[0].equals("text")) {
+                if (responseMessage.getHeaderLine(State.TYPE_HEADER) != null) {
+                    if (State.TEXT_TYPE.equals(responseMessage.getHeaderLine(State.TYPE_HEADER).split(State.SPLIT_FLAG)[0])) {
                         System.out.println(responseMessage.getEntityBody());
                     } else {
                         //计算文件名
@@ -94,26 +94,25 @@ class Connection {
                         }
                     }
                 }
-            }
-            else {
+            } else {
                 System.err.println(responseMessage.getStatusCode() + " " + responseMessage.getReasonPhrase());
             }
-        }catch (ResolveException e){
+        } catch (ResolveException e) {
             e.printStackTrace();
             System.err.println("客户端解析错误！");
-        }catch (MimeTypeException e){
+        } catch (MimeTypeException e) {
             e.printStackTrace();
             System.err.println("MIME类型不受支持！");
-        }catch (FileNotFoundException e){
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
             System.err.println("文件夹不存在！");
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             System.err.println("文件写入发生错误！");
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
             System.err.println("内容解析失败！");
-        }catch (ResourceStoreException e){
+        } catch (ResourceStoreException e) {
             e.printStackTrace();
             System.err.println("存储目录出现问题！");
         }
@@ -122,12 +121,12 @@ class Connection {
                 Connection.number++;
                 id = Connection.number;
                 State.persistentConnections.put(number, this);
+                System.out.println("Client <<INFO>> : The Connection is not closed.");
             }
         } else {
             State.tempConnection = null;
             State.persistentConnections.remove(id);
             close();
-            System.out.println();
             System.out.println("Client <<INFO>> : Close a connection.");
         }
     }
@@ -149,22 +148,25 @@ class Connection {
      * @return 当前连接是否为长连接
      */
     private boolean isPersistent() {
-        return "keep-alive".equals(requestMessage.getHeaderLines().get("Connection"));
+        if (requestMessage.getHeaderLines().containsKey(State.CONNECTION_HEADER)) {
+            return State.PERSISTENT_HEADER.equals(requestMessage.getHeaderLines().get(State.CONNECTION_HEADER));
+        } else {
+            return requestMessage.getVersion().equals(State.VALID_VERSION.get(1));
+        }
     }
 
-    private String processUrl(String originUrl) throws ResourceStoreException{
+    private String processUrl(String originUrl) throws ResourceStoreException {
         File dire = new File("clientResources");
         if (!dire.exists()) {
             if (!dire.mkdir()) {
                 throw new ResourceStoreException();
             }
-        }
-        else if (dire.exists() && dire.isDirectory()){
+        } else if (dire.exists() && dire.isDirectory()) {
             return "clientResources" + originUrl;
-        }
-        else{
+        } else {
             throw new ResourceStoreException();
         }
         return "clientResources" + originUrl;
     }
+
 }

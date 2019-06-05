@@ -34,7 +34,6 @@ class Receiver {
             byte[] responseBytes = new byte[responseLength];
             in.readFully(responseBytes);
             response = new String(responseBytes, StandardCharsets.UTF_8);
-            System.out.println();
             System.out.println("client <<INFO>> : Receive a response");
             System.out.println("====================================");
             System.out.println(response);

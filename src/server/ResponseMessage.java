@@ -20,7 +20,7 @@ class ResponseMessage {
     private String entityBody;
 
     ResponseMessage(String version, String statusCode, String reasonPhrase){
-        headerLines = new HashMap<String, String>();
+        headerLines = new HashMap<>();
         this.version = version;
         this.statusCode = statusCode;
         this.reasonPhrase = reasonPhrase;

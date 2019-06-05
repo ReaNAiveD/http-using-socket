@@ -14,11 +14,21 @@ class State {
     static final String GET_COMMAND = "get";
     static final String POST_COMMAND = "post";
     static final String SEND_COMMAND = "send";
-    static final String URL_REGEX = "^/?.*";
+    static final String PATH_REGEX = "\\.*/?.*$";
     static final String PERSISTENT_REGEX = "^[0-9]+$";
+    static final String GET_METHOD = "GET";
+    static final String POST_METHOD = "POST";
+    static final String DEFAULT_PATH = "127.0.0.1";
+    static final String HOST_HEADER = "Host";
+    static final String TYPE_HEADER = "Content-Type";
+    static final String CONNECTION_HEADER = "Connection";
+    static final String PERSISTENT_HEADER = "keep-alive";
+    static final String TEXT_TYPE = "text";
     static final String EMPTY_BODY = "e";
     static final String TEXT_BODY = "a";
     static final String FILE_BODY = "b";
+    static final String SPLIT_FLAG = "/";
+    static final String SPACE_FLAG = " ";
     static final List<String> VALID_VERSION = Arrays.asList("1.0", "1.1");
     static final int HEADER_LENGTH = 2;
 
@@ -35,56 +45,64 @@ class State {
      */
     static void suggest() {
         System.out.println();
+        System.out.println("+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + ");
         switch (input) {
             case INIT:
                 System.out.println("client <<TIP>> : \"q\" to quit.");
                 System.out.println("client <<TIP>> : \"s\" to show information.");
                 System.out.println("client <<TIP>> : \"get\" to create a GET connection.");
                 System.out.println("client <<TIP>> : \"post\" to create a POST connection.");
+                System.out.println("client <<TIP>> : default value  \"\" to refresh.");
                 if (tempConnection != null) {
                     System.out.println("client <<TIP>> : \"send\" to send the request.");
                 }
                 TreeSet<Integer> set = new TreeSet<>(Comparator.reverseOrder());
                 set.addAll(State.persistentConnections.keySet());
-                for (Integer i: set) {
+                for (Integer i : set) {
                     System.out.println("client <<TIP>> : \"" + i + "\" to choose the persistent connection " + i + ".");
                 }
                 break;
-            case GET:
-            case POST:
+            case METHOD:
                 System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
-                System.out.println("client <<TIP>> : URL to set URL.");
+                System.out.println("client <<TIP>> : path to set path.");
+                System.out.println("client <<TIP>> : default value  \"127.0.0.1\" to set path.");
                 break;
-            case URL:
+            case PATH:
                 System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
                 System.out.println("client <<TIP>> : \"1.0\" or \"1.1\" to set http version.");
+                System.out.println("client <<TIP>> : default value  \"1.1\" to set version.");
                 break;
-            case VERSION:
             case PERSISTENT:
                 System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
-                System.out.println("client <<TIP>> : key and value to set header.");
+                System.out.println("client <<TIP>> : relative path to set relative path.");
                 break;
-            case HEADER:
+            case VERSION:
+            case RELATIVE:
+            case KEY_VALUE:
                 System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
                 System.out.println("client <<TIP>> : key and value to set header.");
                 System.out.println("client <<TIP>> : blank to stop setting header.");
                 break;
-            case BODYTYPE:
+            case HEADER:
                 System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
-                System.out.println("client <<TIP>> : \"e\" to set body empty");
-                System.out.println("client <<TIP>> : \"a\" to set body to one-line text");
-                System.out.println("client <<TIP>> : \"b\" to set body to file");
+                System.out.println("client <<TIP>> : \"e\" to set body empty.");
+                System.out.println("client <<TIP>> : \"a\" to set body to one-line text.");
+                System.out.println("client <<TIP>> : \"b\" to set body to file.");
+                System.out.println("client <<TIP>> : default value  \"e\" to set empty body.");
                 break;
-            case BODY:
-                System.out.println("client <<TIP>> : input body content and enter to submit. ");
+            case BODY_TEXT:
+                System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
+                System.out.println("client <<TIP>> : text to set one-line text.");
                 break;
-            case BODYPATH:
-                System.out.println("client <<TIP>> : input client resource path. ");
-                System.out.println("client <<TIP>> : e.g. /hello.txt ");
+            case BODY_PATH:
+                System.out.println("client <<TIP>> : \"q\" to abandon editing the request.");
+                System.out.println("client <<TIP>> : file path to set file.");
+                System.out.println("client <<TIP>> : default value  \"/hello.txt\" to set file.");
                 break;
             default:
                 break;
         }
+        System.out.print("User > ");
     }
 
     /**

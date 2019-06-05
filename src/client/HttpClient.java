@@ -20,6 +20,7 @@ public class HttpClient {
                 if (!new Command(s).run()) {
                     System.out.println("client <<WARNING>> : Invalid command, please enter a new command.");
                 }
+                System.out.println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
             } while (!State.quit);
         } catch (Exception e) {
             e.printStackTrace();

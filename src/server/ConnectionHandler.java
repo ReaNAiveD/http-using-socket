@@ -1,12 +1,10 @@
 package server;
 
+import server.exception.ResolveException;
+import server.utils.InputStreamTool;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
-import server.RequestMessage;
-import server.ResponseMessage;
-import server.exception.ResolveException;
-import server.utils.InputStreamTool;
 
 import java.io.*;
 import java.net.Socket;
@@ -60,12 +58,11 @@ class ConnectionHandler extends Thread {
             requestMessage = RequestMessage.parse(receiver.receive());
             dealWithRequest();
             sender.send(responseMessage.getResponse());
-        }
-        catch (ResolveException e){
+        } catch (ResolveException e) {
             e.printStackTrace();
             responseMessage = new ResponseMessage("1.1", "400", "Bad Request");
             sender.send(responseMessage.getResponse());
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             responseMessage = new ResponseMessage("1.1", "500", "Internal Server Error");
             sender.send(responseMessage.getResponse());
@@ -77,9 +74,9 @@ class ConnectionHandler extends Thread {
      * 处理请求
      */
     private void dealWithRequest() {
-        if (requestMessage.getMethod().equals("GET")){
+        if (requestMessage.getMethod().equals("GET")) {
             File requestedFile = new File(processUrl(requestMessage.getUrl()));
-            if (requestedFile.exists()){
+            if (requestedFile.exists()) {
                 try {
                     responseMessage = new ResponseMessage("1.1", "200", "OK");
                     String contentType = Files.probeContentType(requestedFile.toPath());
@@ -88,33 +85,29 @@ class ConnectionHandler extends Thread {
                     byte[] data = InputStreamTool.readAllBytes(inputStream);
                     inputStream.close();
                     //如果是text类型的
-                    if (contentType.split("/")[0].equals("text")){
+                    if (contentType.split("/")[0].equals("text")) {
                         responseMessage.setEntityBody(new String(data, StandardCharsets.UTF_8));
-                    }
-                    else {
+                    } else {
                         Base64.Encoder encoder = Base64.getEncoder();
                         responseMessage.setEntityBody(encoder.encodeToString(data));
                     }
-                }
-                catch (IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                     responseMessage = new ResponseMessage("1.1", "500", "Internal Server Error");
                 }
-            }
-            else {
+            } else {
                 responseMessage = new ResponseMessage("1.1", "404", "Not Found");
             }
         }
 
-        if (requestMessage.getMethod().equals("POST")){
-            if(requestMessage.getHeaderLine("Content-Type") == null){
-                System.out.println("Server <<INFO>> : Receive a POST request to URL " + requestMessage.getUrl() + " without Content-Type. Content: ");
+        if (requestMessage.getMethod().equals("POST")) {
+            if (requestMessage.getHeaderLine("Content-Type") == null) {
+                System.out.println("Server <<INFO>> : Receive a POST request to PATH " + requestMessage.getUrl() + " without Content-Type. Content: ");
                 System.out.println(requestMessage.getEntityBody());
                 responseMessage = new ResponseMessage("1.1", "200", "OK");
-            }
-            else {
+            } else {
                 if (requestMessage.getHeaderLine("Content-Type").equals("text")) {
-                    System.out.println("Server <<INFO>> : Receive a POST request which is " + requestMessage.getHeaderLine("Content-Type") + " to URL " + requestMessage.getUrl() + ". Content: ");
+                    System.out.println("Server <<INFO>> : Receive a POST request which is " + requestMessage.getHeaderLine("Content-Type") + " to PATH " + requestMessage.getUrl() + ". Content: ");
                     System.out.println(requestMessage.getEntityBody());
                 } else {
                     try {
@@ -137,7 +130,7 @@ class ConnectionHandler extends Thread {
                                 outputStream.write(b);
                                 outputStream.flush();
                                 outputStream.close();
-                                System.out.println("Server <<INFO>> : Receive a POST request to URL " + requestMessage.getUrl() + " with " + requestMessage.getHeaderLine("Content-Type") + ". ");
+                                System.out.println("Server <<INFO>> : Receive a POST request to PATH " + requestMessage.getUrl() + " with " + requestMessage.getHeaderLine("Content-Type") + ". ");
                                 System.out.println("Server <<INFO>> : Received Resources have been saved to " + storeUrl);
                                 break;
                             }
@@ -161,14 +154,14 @@ class ConnectionHandler extends Thread {
         }
     }
 
-    private String processUrl(String originUrl){
-        if (originUrl.equals("")){
+    private String processUrl(String originUrl) {
+        if (originUrl.equals("")) {
             return "resources" + getDefaultUrl();
         }
         return "resources" + originUrl;
     }
 
-    private String getDefaultUrl(){
+    private String getDefaultUrl() {
         return "/hello.txt";
     }
 
@@ -178,7 +171,11 @@ class ConnectionHandler extends Thread {
      * @return 当前连接是否为长连接
      */
     private boolean isPersistent() {
-        return "keep-alive".equals(requestMessage.getHeaderLine("Connection"));
+        if (requestMessage.getHeaderLines().containsKey("Connection")) {
+            return "keep-alive".equals(requestMessage.getHeaderLine("Connection"));
+        } else {
+            return "1.1".equals(requestMessage.getVersion());
+        }
     }
 
 }

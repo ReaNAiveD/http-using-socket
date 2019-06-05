@@ -28,7 +28,6 @@ class Sender {
      */
     void send(String request) {
         try {
-            System.out.println();
             System.out.println("client <<INFO>> : Send a request");
             System.out.println("================================");
             System.out.println(request);
@@ -36,7 +35,6 @@ class Sender {
             byte[] requestBytes = request.getBytes();
             out.writeInt(requestBytes.length);
             out.write(requestBytes);
-            //out.writeUTF(request);
         } catch (Exception e) {
             e.printStackTrace();
         }
