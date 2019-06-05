@@ -60,11 +60,11 @@ class ConnectionHandler extends Thread {
             sender.send(responseMessage.getResponse());
         } catch (ResolveException e) {
             e.printStackTrace();
-            responseMessage = new ResponseMessage("1.1", "400", "Bad Request");
+            responseMessage = new ResponseMessage(requestMessage.getVersion(), "400", "Bad Request");
             sender.send(responseMessage.getResponse());
         } catch (Exception e) {
             e.printStackTrace();
-            responseMessage = new ResponseMessage("1.1", "500", "Internal Server Error");
+            responseMessage = new ResponseMessage(requestMessage.getVersion(), "500", "Internal Server Error");
             sender.send(responseMessage.getResponse());
         }
     }
@@ -75,36 +75,79 @@ class ConnectionHandler extends Thread {
      */
     private void dealWithRequest() {
         if (requestMessage.getMethod().equals("GET")) {
+            //待检查的路径，看文件有没有改位置或者监控修改
+            String pathToCheck = requestMessage.getUrl();
+            if(Resources.isPerMoved(pathToCheck)){
+                responseMessage = new ResponseMessage(requestMessage.getVersion(), "301", "Moved Permanently");
+                responseMessage.addHeaderLines("Location", Resources.getMovedPath_Per(pathToCheck));
+                responseMessage.setEntityBody("This file is permanently moved.");
+                return;
+            }
+            else if(Resources.isTempMoved(pathToCheck)){
+                responseMessage = new ResponseMessage(requestMessage.getVersion(), "302", "Moved Permanently");
+                responseMessage.addHeaderLines("Location", Resources.getMovedPath_Temp(pathToCheck));
+                responseMessage.setEntityBody("This file is temporarily moved.");
+                return;
+            }
+            else if(Resources.isPathMightCauseError(pathToCheck)){
+                responseMessage = new ResponseMessage(requestMessage.getVersion(), "500", "Internal Server Error");
+                return;
+            }
+            else if(Resources.isTracked(pathToCheck)){
+
+                if(requestMessage.getHeaderLine("If-Modified-Since")==null){
+                    //相当于第一次请求这个资源
+                    try {
+                        putFileInResponse(new File(processUrl(pathToCheck)));
+                        responseMessage.addHeaderLines("Last-Modified", Resources.getTrackedFileByPath(pathToCheck).getLast_modified());
+                        responseMessage.addHeaderLines("ETag", Resources.getTrackedFileByPath(pathToCheck).getETag());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        responseMessage = new ResponseMessage(requestMessage.getVersion(), "500", "Internal Server Error");
+                    }
+                }
+                else {
+                    //查看是否修改，是否需要发新资源
+                    String clientModified = requestMessage.getHeaderLine("If-Modified-Since");
+                    String last_modified = Resources.getTrackedFileByPath(pathToCheck).getLast_modified();
+                    if(clientModified.equals(last_modified)){
+                        //没有被修改，不需要传新文件
+                        responseMessage = new ResponseMessage(requestMessage.getVersion(), "304", "Not Modified");
+                    }
+                    else {
+                        //有过修改，发新的
+                        try {
+                            putFileInResponse(new File(processUrl(pathToCheck)));
+                            responseMessage.addHeaderLines("Last-Modified", last_modified);
+                            responseMessage.addHeaderLines("ETag", Resources.getTrackedFileByPath(pathToCheck).getETag());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            responseMessage = new ResponseMessage(requestMessage.getVersion(), "500", "Internal Server Error");
+                        }
+                    }
+                }
+
+                return;
+            }
+
+            //以下为普通的文件请求
             File requestedFile = new File(processUrl(requestMessage.getUrl()));
             if (requestedFile.exists()) {
                 try {
-                    responseMessage = new ResponseMessage("1.1", "200", "OK");
-                    String contentType = Files.probeContentType(requestedFile.toPath());
-                    responseMessage.setContentType(contentType);
-                    InputStream inputStream = new FileInputStream(requestedFile);
-                    byte[] data = InputStreamTool.readAllBytes(inputStream);
-                    inputStream.close();
-                    //如果是text类型的
-                    if (contentType.split("/")[0].equals("text")) {
-                        responseMessage.setEntityBody(new String(data, StandardCharsets.UTF_8));
-                    } else {
-                        Base64.Encoder encoder = Base64.getEncoder();
-                        responseMessage.setEntityBody(encoder.encodeToString(data));
-                    }
+                    putFileInResponse(requestedFile);
                 } catch (IOException e) {
                     e.printStackTrace();
-                    responseMessage = new ResponseMessage("1.1", "500", "Internal Server Error");
+                    responseMessage = new ResponseMessage(requestMessage.getVersion(), "500", "Internal Server Error");
                 }
             } else {
-                responseMessage = new ResponseMessage("1.1", "404", "Not Found");
+                responseMessage = new ResponseMessage(requestMessage.getVersion(), "404", "Not Found");
             }
         }
-
-        if (requestMessage.getMethod().equals("POST")) {
+        else if (requestMessage.getMethod().equals("POST")) {
             if (requestMessage.getHeaderLine("Content-Type") == null) {
                 System.out.println("Server <<INFO>> : Receive a POST request to PATH " + requestMessage.getUrl() + " without Content-Type. Content: ");
                 System.out.println(requestMessage.getEntityBody());
-                responseMessage = new ResponseMessage("1.1", "200", "OK");
+                responseMessage = new ResponseMessage(requestMessage.getVersion(), "200", "OK");
             } else {
                 if (requestMessage.getHeaderLine("Content-Type").equals("text")) {
                     System.out.println("Server <<INFO>> : Receive a POST request which is " + requestMessage.getHeaderLine("Content-Type") + " to PATH " + requestMessage.getUrl() + ". Content: ");
@@ -135,22 +178,25 @@ class ConnectionHandler extends Thread {
                                 break;
                             }
                         }
-                        responseMessage = new ResponseMessage("1.1", "200", "OK");
+                        responseMessage = new ResponseMessage(requestMessage.getVersion(), "200", "OK");
                     } catch (MimeTypeException e) {
                         System.err.println("Server <<EXCEPTION>> : Unsupported MimeType");
-                        responseMessage = new ResponseMessage("1.1", "415", "Unsupported Media Type");
+                        responseMessage = new ResponseMessage(requestMessage.getVersion(), "415", "Unsupported Media Type");
                     } catch (FileNotFoundException e) {
                         System.err.println("Server <<EXCEPTION>> : Server Receive Fold Not Exist");
-                        responseMessage = new ResponseMessage("1.1", "500", "Internal Server Error");
+                        responseMessage = new ResponseMessage(requestMessage.getVersion(), "500", "Internal Server Error");
                     } catch (IOException e) {
                         System.err.println("Server <<EXCEPTION>> : IO EXCEPTION");
-                        responseMessage = new ResponseMessage("1.1", "500", "Internal Server Error");
+                        responseMessage = new ResponseMessage(requestMessage.getVersion(), "500", "Internal Server Error");
                     } catch (Exception e) {
                         e.printStackTrace();
-                        responseMessage = new ResponseMessage("1.1", "500", "Internal Server Error");
+                        responseMessage = new ResponseMessage(requestMessage.getVersion(), "500", "Internal Server Error");
                     }
                 }
             }
+        }
+        else{
+            responseMessage = new ResponseMessage(requestMessage.getVersion(), "405", "Method Not Allowed");
         }
     }
 
@@ -175,6 +221,23 @@ class ConnectionHandler extends Thread {
             return "keep-alive".equals(requestMessage.getHeaderLine("Connection"));
         } else {
             return "1.1".equals(requestMessage.getVersion());
+        }
+    }
+
+    //此方法创建状态码为200的响应报文
+    private void putFileInResponse(File requestedFile) throws IOException{
+        responseMessage = new ResponseMessage(requestMessage.getVersion(), "200", "OK");
+        String contentType = Files.probeContentType(requestedFile.toPath());
+        responseMessage.setContentType(contentType);
+        InputStream inputStream = new FileInputStream(requestedFile);
+        byte[] data = InputStreamTool.readAllBytes(inputStream);
+        inputStream.close();
+        //如果是text类型的
+        if (contentType.split("/")[0].equals("text")) {
+            responseMessage.setEntityBody(new String(data, StandardCharsets.UTF_8));
+        } else {
+            Base64.Encoder encoder = Base64.getEncoder();
+            responseMessage.setEntityBody(encoder.encodeToString(data));
         }
     }
 

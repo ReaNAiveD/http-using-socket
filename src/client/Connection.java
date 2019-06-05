@@ -60,11 +60,30 @@ class Connection {
                 e.printStackTrace();
             }
         }
+        dealWithTrackedFile(requestMessage.getPath());
         sender.send(requestMessage.getRequest());
         try {
             responseMessage.setByResponse(receiver.receive());
+            if("301".equals(responseMessage.getStatusCode())||"302".equals(responseMessage.getStatusCode())){
+                //重新发送请求
+                System.out.println("Client <<INFO>> : Redirect. Send request to the new path.");
+                String newFilePath = responseMessage.getHeaderLine("Location");
+                State.tempConnection.getRequestMessage().setPath(newFilePath);
+                State.tempConnection.sendAndReceive();
+                return;
+            }
+            else if("304".equals(responseMessage.getStatusCode())){
+                System.out.println("Client <<INFO>> : Requested file not modified, use the local one.");
+                return;
+            }
             //根据状态码处理
             if ("200".equals(responseMessage.getStatusCode())) {
+                //有修改时间标识
+                if(responseMessage.getHeaderLine("Last-Modified")!=null){
+                    TrackedFile file = new TrackedFile(requestMessage.getPath(),
+                            responseMessage.getHeaderLine("Last-Modified"), responseMessage.getHeaderLine("ETag"));
+                    Resources.addTrackedFile(file);
+                }
                 if (responseMessage.getHeaderLine(State.TYPE_HEADER) != null) {
                     if (State.TEXT_TYPE.equals(responseMessage.getHeaderLine(State.TYPE_HEADER).split(State.SPLIT_FLAG)[0])) {
                         System.out.println(responseMessage.getEntityBody());
@@ -167,6 +186,14 @@ class Connection {
             throw new ResourceStoreException();
         }
         return "clientResources" + originUrl;
+    }
+
+    private void dealWithTrackedFile(String filePath){
+        if(Resources.isTracked(filePath)){
+            TrackedFile file = Resources.getTrackedFileByPath(filePath);
+            requestMessage.addHeaderLine("If-Modified-Since", file.getLast_modified());
+            requestMessage.addHeaderLine("If-None-Match", file.getETag());
+        }
     }
 
 }

@@ -51,3 +51,22 @@ send
 - 服务器响应只有1.1
 - 一定情形侠退出客户端，服务器端会炸
 - 状态码不完全
+
+##
+301与302的测试码
+get
+/testFor301.txt
+send
+
+304的测试码
+get
+/testFor304.txt
+send
+
+再来一次
+get
+/testFor304.txt
+send
+
+##没来的及修的bug
+使用长连接的话上一次长连接里的requestMessage的header没有清干净，对下一次造成了一定困扰

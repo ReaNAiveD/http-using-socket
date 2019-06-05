@@ -12,6 +12,8 @@ public class HttpServer {
 
     public static void main(String[] args) {
         try {
+            //初始化资源
+            Resources.initialPreparedResources();
             System.out.println("Server <<INFO>> : Server is ready.");
             ServerSocket serverSocket = new ServerSocket(8080);
             while (true) {

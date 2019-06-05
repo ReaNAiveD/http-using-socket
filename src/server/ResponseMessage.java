@@ -55,7 +55,7 @@ class ResponseMessage {
         headerLines.put("Content-Type", contentType);
     }
 
-    public void AddHeaderLines(String key, String value){
+    public void addHeaderLines(String key, String value){
         headerLines.put(key, value);
     }
 

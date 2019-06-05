@@ -26,6 +26,10 @@ class RequestMessage {
         System.out.println("client <<INFO>> : Set the request method to " + method + ".");
     }
 
+    public String getPath() {
+        return path;
+    }
+
     void setPath(String path) {
         this.path = path;
         System.out.println("client <<INFO>> : Set the request path to \"" + path + "\".");

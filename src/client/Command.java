@@ -73,7 +73,12 @@ class Command {
                         State.tempConnection.getRequestMessage().initHeaderLine(State.HOST_HEADER, command);
                         State.tempConnection.getRequestMessage().setPath("");
                     } else {
-                        State.tempConnection.getRequestMessage().initHeaderLine(State.HOST_HEADER, command.substring(0, index));
+                        if(command.substring(0, index).equals("")){
+                            State.tempConnection.getRequestMessage().initHeaderLine(State.HOST_HEADER, State.DEFAULT_PATH);
+                        }
+                        else {
+                            State.tempConnection.getRequestMessage().initHeaderLine(State.HOST_HEADER, command.substring(0, index));
+                        }
                         State.tempConnection.getRequestMessage().setPath(command.substring(index));
                     }
                     State.input = Input.PATH;

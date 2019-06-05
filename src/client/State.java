@@ -14,7 +14,7 @@ class State {
     static final String GET_COMMAND = "get";
     static final String POST_COMMAND = "post";
     static final String SEND_COMMAND = "send";
-    static final String PATH_REGEX = "\\.*/?.*$";
+    static final String PATH_REGEX = ".*/?.*$";
     static final String PERSISTENT_REGEX = "^[0-9]+$";
     static final String GET_METHOD = "GET";
     static final String POST_METHOD = "POST";
