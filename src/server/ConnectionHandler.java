@@ -57,8 +57,6 @@ class ConnectionHandler extends Thread {
         try {
             requestMessage = RequestMessage.parse(receiver.receive());
             dealWithRequest();
-            //System.out.println("responseMessage == null : " + (responseMessage == null));
-            //System.out.println("responseMessage.getResponse() == null : " + (responseMessage.getResponse() == null));
             sender.send(responseMessage.getResponse());
         } catch (ResolveException e) {
             e.printStackTrace();
@@ -173,7 +171,11 @@ class ConnectionHandler extends Thread {
      * @return 当前连接是否为长连接
      */
     private boolean isPersistent() {
-        return "keep-alive".equals(requestMessage.getHeaderLine("Connection"));
+        if (requestMessage.getHeaderLines().containsKey("Connection")) {
+            return "keep-alive".equals(requestMessage.getHeaderLine("Connection"));
+        } else {
+            return "1.1".equals(requestMessage.getVersion());
+        }
     }
 
 }

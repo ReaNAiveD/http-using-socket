@@ -34,6 +34,10 @@ class RequestMessage {
         return headerLines.getOrDefault(key, null);
     }
 
+    public HashMap<String, String> getHeaderLines() {
+        return headerLines;
+    }
+
     public String getEntityBody() {
         return entityBody;
     }
