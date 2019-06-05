@@ -121,12 +121,12 @@ class Connection {
                 Connection.number++;
                 id = Connection.number;
                 State.persistentConnections.put(number, this);
+                System.out.println("Client <<INFO>> : The Connection is not closed.");
             }
         } else {
             State.tempConnection = null;
             State.persistentConnections.remove(id);
             close();
-            System.out.println();
             System.out.println("Client <<INFO>> : Close a connection.");
         }
     }

@@ -45,6 +45,7 @@ class State {
      */
     static void suggest() {
         System.out.println();
+        System.out.println("+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + ");
         switch (input) {
             case INIT:
                 System.out.println("client <<TIP>> : \"q\" to quit.");
@@ -101,6 +102,7 @@ class State {
             default:
                 break;
         }
+        System.out.print("User > ");
     }
 
     /**
