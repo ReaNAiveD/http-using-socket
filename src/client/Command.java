@@ -48,6 +48,10 @@ class Command {
                     State.tempConnection = new Connection();
                     State.tempConnection.getRequestMessage().setMethod(State.POST_METHOD);
                     State.input = Input.METHOD;
+                } else if (State.PUT_COMMAND.equals(command)) {
+                    State.tempConnection = new Connection();
+                    State.tempConnection.getRequestMessage().setMethod(State.PUT_METHOD);
+                    State.input = Input.METHOD;
                 } else if (State.SEND_COMMAND.equals(command) && State.tempConnection != null) {
                     State.tempConnection.sendAndReceive();
                     State.input = Input.INIT;

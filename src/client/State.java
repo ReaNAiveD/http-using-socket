@@ -14,10 +14,12 @@ class State {
     static final String GET_COMMAND = "get";
     static final String POST_COMMAND = "post";
     static final String SEND_COMMAND = "send";
+    static final String PUT_COMMAND = "put";
     static final String PATH_REGEX = ".*/?.*$";
     static final String PERSISTENT_REGEX = "^[0-9]+$";
     static final String GET_METHOD = "GET";
     static final String POST_METHOD = "POST";
+    static final String PUT_METHOD = "PUT";
     static final String DEFAULT_PATH = "127.0.0.1";
     static final String HOST_HEADER = "Host";
     static final String TYPE_HEADER = "Content-Type";
