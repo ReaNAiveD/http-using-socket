@@ -90,7 +90,13 @@ class ConnectionHandler extends Thread {
                 return;
             }
             else if(Resources.isPathMightCauseError(pathToCheck)){
-                responseMessage = new ResponseMessage(requestMessage.getVersion(), "500", "Internal Server Error");
+                try {
+                    int i = 1 / 0;
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    responseMessage = new ResponseMessage(requestMessage.getVersion(), "500", "Internal Server Error");
+                }
                 return;
             }
             else if(Resources.isTracked(pathToCheck)){
