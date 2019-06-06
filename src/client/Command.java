@@ -52,7 +52,11 @@ class Command {
                     State.tempConnection.sendAndReceive();
                     State.input = Input.INIT;
                 } else if (command.matches(State.PERSISTENT_REGEX) && State.persistentConnections.keySet().contains(Integer.valueOf(command))) {
+                    //使用长连接，仅保留报文的请求行，而头部保留host
                     State.tempConnection = State.persistentConnections.get(Integer.valueOf(command));
+                    String host = State.tempConnection.getRequestMessage().getHeaderLines().get(State.HOST_HEADER);
+                    State.tempConnection.getRequestMessage().clearHeaderLines();
+                    State.tempConnection.getRequestMessage().addHeaderLine(State.HOST_HEADER, host);
                     System.out.println("client <<INFO>> : Choose the persistent connection " + Integer.valueOf(command) + ".");
                     State.input = Input.PERSISTENT;
                 } else {

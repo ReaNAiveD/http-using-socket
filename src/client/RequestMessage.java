@@ -59,6 +59,10 @@ class RequestMessage {
         addHeaderLine(key, value);
     }
 
+    void clearHeaderLines(){
+        this.headerLines = new HashMap<>();
+    }
+
     /**
      * 增加header键值对
      *
