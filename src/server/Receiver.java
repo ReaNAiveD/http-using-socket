@@ -37,7 +37,11 @@ class Receiver {
             System.out.println();
             System.out.println("Server <<INFO>> : Receive a request");
             System.out.println("===================================");
-            System.out.println(request);
+            if (request.length() > 1000) {
+                System.out.println(request.substring(0, 1000) + "......");
+            } else {
+                System.out.println(request);
+            }
             System.out.println("===================================");
         } catch (Exception e) {
             e.printStackTrace();

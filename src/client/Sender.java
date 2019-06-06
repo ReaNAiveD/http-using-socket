@@ -30,7 +30,11 @@ class Sender {
         try {
             System.out.println("client <<INFO>> : Send a request");
             System.out.println("================================");
-            System.out.println(request);
+            if (request.length() > 1000) {
+                System.out.println(request.substring(0, 1000) + "......");
+            } else {
+                System.out.println(request);
+            }
             System.out.println("================================");
             byte[] requestBytes = request.getBytes();
             out.writeInt(requestBytes.length);

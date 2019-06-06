@@ -36,7 +36,11 @@ class Receiver {
             response = new String(responseBytes, StandardCharsets.UTF_8);
             System.out.println("client <<INFO>> : Receive a response");
             System.out.println("====================================");
-            System.out.println(response);
+            if (response.length() > 1000) {
+                System.out.println(response.substring(0, 1000) + "......");
+            } else {
+                System.out.println(response);
+            }
             System.out.println("====================================");
         } catch (Exception e) {
             e.printStackTrace();

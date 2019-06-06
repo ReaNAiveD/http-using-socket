@@ -30,9 +30,13 @@ class Sender {
     int send(String response) {
         try {
             System.out.println();
-            System.out.println("client <<INFO>> : Send a response");
+            System.out.println("server <<INFO>> : Send a response");
             System.out.println("=================================");
-            System.out.println(response);
+            if (response.length() > 1000) {
+                System.out.println(response.substring(0, 1000) + "......");
+            } else {
+                System.out.println(response);
+            }
             System.out.println("=================================");
             byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
             out.writeInt(responseBytes.length);
